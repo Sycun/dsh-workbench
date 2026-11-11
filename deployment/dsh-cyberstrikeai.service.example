@@ -1,0 +1,23 @@
+[Unit]
+Description=CyberStrikeAI for DSH Workbench
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=YOUR_USER
+Group=YOUR_GROUP
+WorkingDirectory=/ABSOLUTE/PATH/TO/CYBERSTRIKEAI
+Environment=HOME=/HOME/OF/YOUR_USER
+Environment=PATH=/ABSOLUTE/PATH/TO/CYBERSTRIKEAI/venv/bin:/HOME/OF/YOUR_USER/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+EnvironmentFile=-/ABSOLUTE/PATH/TO/CYBERSTRIKEAI/mac-network.env
+ExecStart=/ABSOLUTE/PATH/TO/CYBERSTRIKEAI/cyberstrike-ai -config /ABSOLUTE/PATH/TO/CYBERSTRIKEAI/config.yaml --https
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

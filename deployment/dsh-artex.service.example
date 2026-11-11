@@ -7,7 +7,7 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/home/parallels/ARTEX
+WorkingDirectory=/ABSOLUTE/PATH/TO/ARTEX
 ExecStart=/usr/bin/docker compose up -d --no-build --pull never
 TimeoutStartSec=120
 

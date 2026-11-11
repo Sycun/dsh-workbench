@@ -2,3 +2,11 @@ node_modules/
 .runtime/
 *.tgz
 *.log
+
+# Local connection configuration and secrets never ship with the plugin.
+.env
+.env.*
+!.env.example
+*.local.json
+*.credentials.json
+*.local.service

@@ -78,3 +78,9 @@ DSH 原生 `ask_user_question` 已核对。初版使用工作台自己的持久�
 ## 参考项目
 
 核对了社区项目 [ArtlexYoung/dsh-super-code](https://github.com/ArtlexYoung/dsh-super-code)（旧地址 `dsh-super-agent` 已重定向，Apache-2.0）。参考方向是任务/协作执行树展示、当前任务与项目经验分层、运行预算。当前未复制该项目实现、未安装其预设、未引入第二套长期记忆。工作台员工优先复用已安装的 `dsh-auto-memory`；未来如果使用第三方源码，需要保留相应许可和归属说明。
+
+## Alpha 5 通用接入与项目生命周期
+
+默认不提供任何执行端。用户通过设置配置 HTTP/JSON 服务，连接 ID 动态发现；DSH 原生工具与 MCP 仍由员工会话继承。原 Kali 功能为显式启用的可选适配，机器和账号配置留在本地。
+
+项目生命周期以原路径为依据，整项目归档/删除会归档对应 DSH 会话并收起工作区登记；恢复重建登记。默认工作区登记不可删除。直接在 DSH 操作产生不同步提醒，具体规则见 project-lifecycle.md。
