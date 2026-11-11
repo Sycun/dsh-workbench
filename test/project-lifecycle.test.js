@@ -71,3 +71,10 @@ test('不允许错配路径的工作区被归档，默认登记不允许删除',
   f.native.path = f.project.cwd; f.wb.defaultWorkspace = { id: f.native.id, path: f.project.cwd };
   await assert.rejects(f.lifecycle.run(f.project.id, 'delete'), /默认工作区/);
 });
+test('工作单未结束时先暂停，归档恢复不会自动放行排队专员', async t => {
+  const f = await fixture(t);
+  await f.store.change(s => { s.tasks[0].workOrders = [{ id: 'o', title: 'queued', state: 'queued', attempts: [], revision: 1 }]; return null; });
+  await assert.rejects(f.lifecycle.run(f.project.id, 'archive'), /专员工作单/);
+  await f.wb.pause(f.task.id); await f.lifecycle.run(f.project.id, 'archive'); await f.lifecycle.run(f.project.id, 'restore');
+  assert.equal((await f.wb.snapshot()).tasks[0].status, 'paused');
+});

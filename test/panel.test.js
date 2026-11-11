@@ -14,7 +14,7 @@ const task = {
 test('原生面板渲染阶段、问题和执行回执，外部文字保持转义', () => {
   const Panel = createPanel(React, {});
   const html = renderToString(React.createElement(Panel, { initialSnapshot: { projects: [{ id: 'demo-project', name: '示例项目' }], tasks: [task], events: [] }, initialTaskId: task.id }));
-  for (const text of ['需要你决定', '阶段汇报', '整理现状', '暂停 DSH 员工', '答复员工', '核实为已完成']) assert.ok(html.includes(text), text);
+  for (const text of ['需要你决定', '阶段汇报', '整理现状', '暂停主管与专员', '答复员工', '核实为已完成']) assert.ok(html.includes(text), text);
   assert.ok(!html.includes('<script>untrusted()')); assert.ok(html.includes('&lt;script&gt;'));
 });
 test('只有待验收状态展示验收动作', () => {
@@ -25,7 +25,7 @@ test('只有待验收状态展示验收动作', () => {
 test('首页默认只有交办入口，连接和项目表单位于设置二级页面', () => {
   const Panel = createPanel(React, {});
   const html = renderToString(React.createElement(Panel));
-  assert.ok(html.includes('探索未至之境')); assert.ok(html.includes('交给员工')); assert.ok(html.includes('默认工作区'));
+  assert.ok(html.includes('探索未至之境')); assert.ok(html.includes('交给主管')); assert.ok(html.includes('默认工作区'));
   assert.ok(!html.includes('平台登录')); assert.ok(!html.includes('项目绝对路径')); assert.ok(!html.includes('artex 密码')); assert.ok(html.includes('设置'));
   assert.ok(html.includes('智能体模式')); assert.ok(html.includes('模型与思考强度'));
 });
