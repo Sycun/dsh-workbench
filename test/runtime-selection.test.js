@@ -71,3 +71,11 @@ test('目录读取失败保留其他可用目录；配置不接收凭据或全�
   assert.throws(() => normalizeExecution({ apiKey: 'do-not-accept' }), /不支持/);
   assert.throws(() => normalizeExecution({ model: { model: 'x' } }), /提供方/);
 });
+test('选择原生工作区复用已存在的项目，归档项目不能绕过恢复流程', async t => {
+  const f = await fixture(t); const p = (await f.wb.snapshot()).projects[0];
+  f.host.workspaces = { list: () => [{ id: 'native-workspace', path: p.cwd, title: '现有文件夹' }] };
+  const imported = await f.runtime.adoptWorkspace('native-workspace'); assert.equal(imported.id, p.id); assert.equal(imported.workspaceId, 'native-workspace');
+  assert.equal((await f.wb.snapshot()).projects.length, 1);
+  await f.store.change(s => { s.projects[0].lifecycle = 'archived'; return null; });
+  await assert.rejects(f.runtime.adoptWorkspace('native-workspace'), /归档/);
+});

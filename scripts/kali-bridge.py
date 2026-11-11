@@ -25,7 +25,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 ROUTES = {
     'artex': {'GET': [r'/api/auth/status', r'/api/version', r'/api/tasks', r'/api/tasks/[\w-]+', r'/api/tasks/[\w-]+/chat/status'],
               'POST': [r'/api/auth/login', r'/api/chat\?task=[\w%-]+']},
-    'cyberstrikeai': {'GET': [r'/api/auth/validate', r'/api/projects', r'/api/projects/[\w%-]+', r'/api/eino-agent/runs/[\w%-]+'],
+    'cyberstrikeai': {'GET': [r'/api/auth/validate', r'/api/projects(?:\?limit=50&offset=\d{1,6})?', r'/api/projects/[\w%-]+', r'/api/eino-agent/runs/[\w%-]+'],
                       'POST': [r'/api/auth/login', r'/api/eino-agent/runs']}
 }
 

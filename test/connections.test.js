@@ -68,3 +68,23 @@ test('未配置的连接不能绑定到模型执行端；归档后不能从旧�
   await f.store.change(s => { s.projects[0].lifecycle = 'archiving'; return null; });
   await assert.rejects(f.connectors.submit(old, 'my-tool', '工作', 'one'), /归档/);
 });
+test('远端目录按平台真实协议只读分页，返回名称、ID、状态', async t => {
+  const f = await fixture(t); const c = new Connectors(f.store, { artex: { baseUrl: 'http://localhost:1' }, cyberstrikeai: { baseUrl: 'http://localhost:2' } });
+  const paths = []; c.request = async (_, path) => { paths.push(path); return path === '/api/tasks' ? { tasks: [{ id: '7', name: '示例任务', status: 'running' }] } : { projects: [{ id: 'p1', name: '示例项目', status: 'active' }], total: 80 }; };
+  assert.deepEqual((await c.projects('artex')).items, [{ id: '7', name: '示例任务', status: 'running' }]);
+  const page = await c.projects('cyberstrikeai', 50); assert.equal(page.more, false); assert.equal(page.offset, 50);
+  assert.deepEqual(paths, ['/api/tasks', '/api/projects?limit=50&offset=50']);
+});
+test('对话配置建议不直接生效；确认时检测旧配置冲突，并禁止夹带密钥', async t => {
+  const f = await fixture(t), c = { ...config('http://localhost:1234'), authType: 'none' };
+  const proposal = await f.connectors.propose(f.task, c, '接入本地测试服务', '用户提供的接口文档');
+  assert.deepEqual(f.connectors.catalog(), []);
+  assert.equal((await f.connectors.propose(f.task, c, '相同建议', '相同文档')).id, proposal.id);
+  await f.connectors.applyProposal(f.task.id, proposal.id, true); assert.equal(f.connectors.catalog().length, 1);
+  const edit = await f.connectors.propose(f.task, { ...c, label: '新名称' }, '改名', '老板要求');
+  await f.connectors.save({ ...c, label: '手工已改名' });
+  await assert.rejects(f.connectors.applyProposal(f.task.id, edit.id, true), /已被修改/);
+  assert.equal(f.connectors.catalog()[0].label, '手工已改名');
+  await assert.rejects(f.connectors.propose(f.task, { ...c, token: 'secret-value' }, '接入', '文档'), /不支持/);
+  assert.ok(!(await readFile(f.file, 'utf8')).includes('secret-value'));
+});

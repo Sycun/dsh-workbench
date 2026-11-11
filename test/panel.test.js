@@ -25,9 +25,9 @@ test('只有待验收状态展示验收动作', () => {
 test('首页默认只有交办入口，连接和项目表单位于设置二级页面', () => {
   const Panel = createPanel(React, {});
   const html = renderToString(React.createElement(Panel));
-  assert.ok(html.includes('你想安排什么工作')); assert.ok(html.includes('交给员工')); assert.ok(html.includes('默认工作区'));
+  assert.ok(html.includes('探索未至之境')); assert.ok(html.includes('交给员工')); assert.ok(html.includes('默认工作区'));
   assert.ok(!html.includes('平台登录')); assert.ok(!html.includes('项目绝对路径')); assert.ok(!html.includes('artex 密码')); assert.ok(html.includes('设置'));
-  assert.ok(html.includes('智能体模式')); assert.ok(html.includes('模型选择'));
+  assert.ok(html.includes('智能体模式')); assert.ok(html.includes('模型与思考强度'));
 });
 test('模式和模型来自 DSH 目录，显示默认值且不提供 API Key 输入框', () => {
   const Panel = createPanel(React, {});
@@ -57,4 +57,12 @@ test('使用 DSH 菜单组件与原生预设翻译，内部 ID 仍用于选择',
   const presetMenu = menus.find(m => m.anchor.props['aria-label'] === '智能体模式');
   assert.equal(presetMenu.portal, true);
   assert.ok(presetMenu.items.some(item => item.id === 'standard' && renderToString(item.label).includes('DSH 的标准模式说明')));
+});
+test('默认模型的思考强度入口可用，工作区菜单含原生目录与添加入口', () => {
+  const menus = [], Panel = createPanel(React, {}, { Menu: props => { menus.push(props); return props.anchor; } });
+  const html = renderToString(React.createElement(Panel, { initialSnapshot: { projects: [], tasks: [], workspaces: [{ id: 'native', title: '官方工作区', path: '/example' }] }, initialRuntimeCatalog: { presets: [], errors: [], models: { default: { provider: 'p', model: 'm', reasoningEffort: 'high' }, groups: [{ id: 'p', models: [{ id: 'm', name: '模型', reasoning: { efforts: [{ id: 'high', name: 'High' }] } }] }] } } }));
+  const model = menus.find(m => m.anchor.props['aria-label'] === '模型与思考强度');
+  assert.equal(model.items.find(i => i.id === '__efforts__').disabled, false); assert.ok(html.includes('High'));
+  const workspace = menus.find(m => m.anchor.props['aria-label'] === '选择工作区');
+  assert.ok(workspace.items.some(i => i.id === 'workspace:native')); assert.ok(workspace.items.some(i => i.id === '__add__'));
 });
