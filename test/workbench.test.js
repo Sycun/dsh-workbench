@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, readFile } from 'node:fs/promises';
+import { mkdtemp, rm, readFile, writeFile, stat, symlink, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Store, Workbench, intentHints } from '../lib/core.js';
@@ -44,6 +44,14 @@ test('人工暂停不会因为回答问题自动恢复', async t => {
   await assert.rejects(wb.checkpoint(task.id, {}), /已暂停/);
   await wb.resume(task.id); assert.equal((await wb.snapshot()).tasks[0].status, 'running');
 });
+test('补充消息先持久化，投递回执按稳定 ID 更新，暂停时不派发', async t => {
+  const { wb, task, file } = await fixture(t);
+  const message = await wb.message(task.id, '优先给出简短摘要');
+  assert.equal(message.delivered, false);
+  assert.equal(JSON.parse(await readFile(file)).tasks[0].messages[0].id, message.id);
+  await wb.messageDelivered(task.id, message.id); assert.equal((await wb.snapshot()).tasks[0].messages[0].delivered, true);
+  await wb.pause(task.id); await assert.rejects(wb.message(task.id, '不应发送'), /已暂停/);
+});
 test('并发写入不丢任务；拒绝第二写入进程；失败事务不污染内存', async t => {
   const { store, wb, file, project } = await fixture(t);
   await Promise.all(Array.from({ length: 20 }, (_, i) => wb.create({ projectId: project.id, brief: `工作 ${i}` })));
@@ -62,12 +70,34 @@ test('分词不能把两个同名候选变成唯一项目或授权', () => {
   const hints = intentHints('查看银行项目', [{ id: 'a', name: '银行', aliases: [] }, { id: 'b', name: '银行项目', aliases: [] }]);
   assert.deepEqual(hints.projectCandidates, ['a', 'b']); assert.equal(hints.needsSemanticParsing, true); assert.ok(hints.terms.length);
 });
-test('跨站写入、DNS rebinding Host 和非本地请求被拒绝', () => {
-  const req = { method: 'POST', socket: { remoteAddress: '127.0.0.1' }, headers: { host: '127.0.0.1:7777', origin: 'http://127.0.0.1:7777', 'x-dsh-workbench': '1' } };
-  guard(req);
-  assert.throws(() => guard({ ...req, headers: { ...req.headers, origin: 'https://unrelated.example' } }), /跨站/);
-  assert.throws(() => guard({ ...req, headers: { ...req.headers, host: 'unrelated.example' } }), /Host/);
-  assert.throws(() => guard({ ...req, socket: { remoteAddress: '192.0.2.1' } }), /本机/);
+test('新建文件夹在指定路径落盘；已有目录不会被覆盖', async t => {
+  const { wb, dir } = await fixture(t), path = join(dir, 'new-project');
+  const project = await wb.project({ name: '新项目', cwd: path, mode: 'create' });
+  assert.equal(project.cwd, await realpath(path)); assert.ok((await stat(path)).isDirectory());
+  await writeFile(join(path, 'keep.txt'), 'keep');
+  await assert.rejects(wb.project({ name: '不应覆盖', cwd: path, mode: 'create' }), /已存在/);
+  assert.equal(await readFile(join(path, 'keep.txt'), 'utf8'), 'keep');
+});
+test('绑定目录会验证存在性、文件类型和同一真实路径', async t => {
+  const { wb, dir } = await fixture(t);
+  await assert.rejects(wb.project({ name: '缺失', cwd: join(dir, 'missing') }), /不存在/);
+  const file = join(dir, 'file'); await writeFile(file, 'x');
+  await assert.rejects(wb.project({ name: '文件', cwd: file }), /文件夹/);
+  await symlink(dir, join(dir, 'alias'));
+  await assert.rejects(wb.project({ name: '重复目录', cwd: join(dir, 'alias') }), /已经绑定/);
+});
+test('不选择项目时使用原生默认工作区；不会使用进程 cwd', async t => {
+  const { store, dir } = await fixture(t);
+  const wb = new Workbench(store, { id: 'native-default', path: dir });
+  const first = await wb.create({ brief: '默认任务' }), second = await wb.create({ brief: '另一个默认任务' });
+  assert.equal(first.projectId, 'default:native-default'); assert.equal(first.projectId, second.projectId);
+  const project = (await wb.snapshot()).projects.find(p => p.id === first.projectId);
+  assert.equal(project.workspaceId, 'native-default'); assert.equal(project.cwd, dir);
+});
+test('已认证连接上的写入仍需工作台请求标识', () => {
+  const make = headers => new Request('http://127.0.0.1/api/dsh-workbench', { method: 'POST', headers });
+  guard(make({ 'x-dsh-workbench': '1' }));
+  assert.throws(() => guard(make({})), /请求标识/);
 });
 async function connectorFixture(t, fetchImpl) {
   const f = await fixture(t); await f.wb.plan(f.task.id, plan);

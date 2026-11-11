@@ -1,9 +1,12 @@
 {
   "name": "dsh-workbench",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.4",
   "description": "DSH 通用项目工作台：任务契约、阶段汇报、人工决策和专业执行端",
   "private": true,
-  "repository": { "type": "git", "url": "https://github.com/Sycun/dsh-workbench.git" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sycun/dsh-workbench.git"
+  },
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -15,7 +18,9 @@
     "lib",
     "cordis.patch.yml",
     "README.md",
-    "docs"
+    "docs",
+    "scripts/kali-bridge.py",
+    "deployment"
   ],
   "scripts": {
     "test": "node --test test/*.test.js",
@@ -46,7 +51,8 @@
         "@deepseek-ai/dsh-api-session-controller",
         "@deepseek-ai/dsh-client-ui-layout",
         "@deepseek-ai/dsh-client-ui-sidebar",
-        "@deepseek-ai/dsh-client-ui-workspace"
+        "@deepseek-ai/dsh-client-ui-workspace",
+        "@deepseek-ai/dsh-api-workspace-controller"
       ]
     }
   },

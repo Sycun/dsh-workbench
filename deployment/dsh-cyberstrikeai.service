@@ -1,0 +1,23 @@
+[Unit]
+Description=CyberStrikeAI for DSH Workbench
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=parallels
+Group=parallels
+WorkingDirectory=/home/parallels/CyberStrikeAI
+Environment=HOME=/home/parallels
+Environment=PATH=/home/parallels/CyberStrikeAI/venv/bin:/home/parallels/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+EnvironmentFile=-/home/parallels/CyberStrikeAI/mac-network.env
+ExecStart=/home/parallels/CyberStrikeAI/cyberstrike-ai -config /home/parallels/CyberStrikeAI/config.yaml --https
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

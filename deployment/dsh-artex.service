@@ -1,0 +1,15 @@
+[Unit]
+Description=ARTEX Compose startup for DSH Workbench
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/parallels/ARTEX
+ExecStart=/usr/bin/docker compose up -d --no-build --pull never
+TimeoutStartSec=120
+
+[Install]
+WantedBy=multi-user.target

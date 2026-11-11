@@ -19,6 +19,12 @@ test('原生面板渲染阶段、问题和执行回执，外部文字保持转�
 });
 test('只有待验收状态展示验收动作', () => {
   const Panel = createPanel(React, {});
-  const render = status => renderToString(React.createElement(Panel, { initialSnapshot: { projects: [], tasks: [{ ...task, status }], events: [] }, initialTaskId: task.id }));
+  const render = status => renderToString(React.createElement(Panel, { initialSnapshot: { projects: [], tasks: [{ ...task, status, summary: '自检交付' }], events: [] }, initialTaskId: task.id }));
   assert.ok(!render('running').includes('验收通过')); assert.ok(render('review').includes('验收通过'));
+});
+test('首页默认只有交办入口，连接和项目表单位于设置二级页面', () => {
+  const Panel = createPanel(React, {});
+  const html = renderToString(React.createElement(Panel));
+  assert.ok(html.includes('你想安排什么工作')); assert.ok(html.includes('交给员工')); assert.ok(html.includes('默认工作区'));
+  assert.ok(!html.includes('平台登录')); assert.ok(!html.includes('项目绝对路径')); assert.ok(!html.includes('artex 密码')); assert.ok(html.includes('设置'));
 });

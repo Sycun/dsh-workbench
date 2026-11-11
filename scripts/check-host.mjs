@@ -17,7 +17,7 @@ try {
   await plan.execute({ taskId: task.id, objective: '生成摘要', stages: [{ title: '读取资料', acceptance: '有来源' }] }, { agent: { id: 'test-session' } });
   await assert.rejects(plan.execute({ taskId: task.id, objective: 1 }, { agent: { id: 'test-session' } }));
   const disposes = [], registered = [];
-  await apply({ tools: { register: t => registered.push(t.name) }, webServer: { register: r => registered.push(r.path) }, systemPrompt: { section: s => registered.push(s.name) }, effect: fn => disposes.push(fn()) }, { dataFile: join(dir, 'host.json') });
+  await apply({ workspaceRegistry: { initializeDefault: async () => undefined }, tools: { register: t => registered.push(t.name) }, connection: { fetch: { register: r => registered.push(r.path) } }, systemPrompt: { section: s => registered.push(s.name) }, effect: fn => disposes.push(fn()) }, { dataFile: join(dir, 'host.json') });
   assert.equal(registered.length, 9); for (const dispose of disposes) await dispose();
   // Exercise the generated client against actual React and SSR; no browser or model API call.
   const React = await import('react'), renderer = await import('react-dom/server');
@@ -27,6 +27,7 @@ try {
   client.apply({ slots: { inject: (_, fn) => fn(), register: (meta, component) => slots.push({ meta, component }) }, remote: {}, uiWorkspace: {} });
   assert.deepEqual(slots.map(s => s.meta.name), ['main', 'sidebar.panellist']);
   const html = renderer.renderToString(React.createElement(slots[0].component));
-  assert.ok(html.includes('交办工作')); assert.ok(html.includes('选择一个任务'));
+  assert.ok(html.includes('交办工作')); assert.ok(html.includes('你想安排什么工作'));
+  assert.ok(client.inject.includes('remote.session')); assert.ok(client.inject.includes('remote.workspace'));
   console.log('PASS: 7 tool definitions, schema validation, host registration, client slots and React SSR against installed DSH runtime');
 } finally { await store.close(); await rm(dir, { recursive: true, force: true }); }
