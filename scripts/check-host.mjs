@@ -32,6 +32,6 @@ try {
   assert.deepEqual(slots.map(s => s.meta.name), ['main', 'sidebar.panellist']);
   const html = renderer.renderToString(React.createElement(slots[0].component));
   assert.ok(html.includes('交办工作')); assert.ok(html.includes('探索未至之境'));
-  assert.ok(client.inject.includes('remote.session')); assert.ok(client.inject.includes('remote.workspace'));
+  assert.ok(client.inject.includes('layout')); assert.ok(client.inject.includes('fileUpload')); assert.ok(client.inject.includes('remote.session')); assert.ok(client.inject.includes('remote.workspace'));
   console.log('PASS: 19 registered tool definitions, schema validation, host registration, client slots and React SSR against installed DSH runtime');
 } finally { await store.close(); await rm(dir, { recursive: true, force: true }); }

@@ -1,6 +1,6 @@
 {
   "name": "dsh-workbench",
-  "version": "0.1.0-alpha.12",
+  "version": "0.1.0-alpha.16",
   "description": "DSH 通用项目工作台：任务契约、阶段汇报、人工决策和专业执行端",
   "private": true,
   "repository": {
@@ -55,7 +55,8 @@
         "@deepseek-ai/dsh-api-workspace-controller",
         "@deepseek-ai/dsh-client-ui-primitives",
         "@deepseek-ai/dsh-client-locale",
-        "@deepseek-ai/dsh-client-ui-agent-preset"
+        "@deepseek-ai/dsh-client-ui-agent-preset",
+        "@deepseek-ai/dsh-client-file-upload"
       ]
     }
   },

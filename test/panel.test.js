@@ -66,3 +66,13 @@ test('默认模型的思考强度入口可用，工作区菜单含原生目录�
   const workspace = menus.find(m => m.anchor.props['aria-label'] === '选择工作区');
   assert.ok(workspace.items.some(i => i.id === 'workspace:native')); assert.ok(workspace.items.some(i => i.id === '__add__'));
 });
+test('历史页提供分类和单项整理，不混入已归档或回收站任务', () => {
+  const Panel = createPanel(React, {});
+  const html = renderToString(React.createElement(Panel, { initialScreen: 'history', initialSnapshot: { projects: [{ id: 'p', name: '示例项目' }], tasks: [
+    { ...task, id: 'active', projectId: 'p', status: 'accepted', brief: '当前可见任务' },
+    { ...task, id: 'archive', projectId: 'p', status: 'accepted', lifecycle: 'archived', brief: '单独归档内容' },
+    { ...task, id: 'trash', projectId: 'p', status: 'accepted', lifecycle: 'deleted', brief: '回收站内容' }
+  ] } }));
+  for (const label of ['最近任务', '已归档', '回收站', '归档', '移入回收站', '当前可见任务']) assert.ok(html.includes(label));
+  assert.ok(!html.includes('单独归档内容')); assert.ok(!html.includes('回收站内容'));
+});
