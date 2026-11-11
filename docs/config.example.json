@@ -1,0 +1,25 @@
+{
+  "dataFile": "/absolute/path/to/private-runtime/workbench-state.json",
+  "connectors": {
+    "cyberstrikeai": {
+      "baseUrl": "http://127.0.0.1:18080",
+      "tokenEnv": "WORKBENCH_CYBERSTRIKE_TOKEN",
+      "projects": {
+        "WORKBENCH_PROJECT_ID": {
+          "externalId": "CYBERSTRIKE_PROJECT_ID",
+          "grants": [{ "taskId": "WORKBENCH_TASK_ID", "actions": ["submit"], "scope": "仅本地实验资料；请替换成真实授权范围", "expiresAt": "2020-01-01T00:00:00Z" }]
+        }
+      }
+    },
+    "artex": {
+      "baseUrl": "http://127.0.0.1:18081",
+      "tokenEnv": "WORKBENCH_ARTEX_TOKEN",
+      "projects": {
+        "WORKBENCH_PROJECT_ID": {
+          "externalId": "ARTEX_EXISTING_TASK_ID",
+          "grants": []
+        }
+      }
+    }
+  }
+}
