@@ -36,3 +36,5 @@ Alpha 6 核对了 `session.modelCatalog`、`agentPresets.remoteExportList`、`Ag
 Alpha 7 的界面使用 DSH 前端共享模块 `@deepseek-ai/dsh-client-ui-primitives` 的 Menu、图标，以及 `settings.agentPreset` 名称/说明字典，不依赖内部 CSS 类名。模型目录缺少 name 的内置模式通过 DSH 翻译显示，自定义模式使用原始元数据。
 
 2026-11-11 Alpha 7 桌面实测：原生菜单显示标准/PTC/极简/创造模式的中文名称和说明，并保留已安装自定义模式；选择模式、模型和 Low 后输入框外框持续显示。隔离自检任务完成计划、阶段回报和申请验收；其原生 model/selection 事件与两条 request/header 均记录所选模型及 low，且刷新模型目录后宿主默认仍为 max。此验证没有读取业务文件或调用外部执行端。自动化测试共 40 项通过。
+
+Alpha 8 将成果归档到用户指定的本机项目目录。自动化验证覆盖返回 JSON、版本化 Markdown 报告、并发落盘、文件哈希、符号链接边界、磁盘阻塞后的重试，以及远端已接单但本地失败时不重复派工；共 47 项通过。已在本机项目文件系统验证生成回执 JSON 和最终报告，未使用业务目标作为探针。

@@ -1,6 +1,6 @@
 {
   "name": "dsh-workbench",
-  "version": "0.1.0-alpha.7",
+  "version": "0.1.0-alpha.8",
   "description": "DSH 通用项目工作台：任务契约、阶段汇报、人工决策和专业执行端",
   "private": true,
   "repository": {

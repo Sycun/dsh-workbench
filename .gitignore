@@ -10,3 +10,6 @@ node_modules/
 *.local.json
 *.credentials.json
 *.local.service
+
+# Generated task deliverables are local project data, not plugin source.
+工作台产出/
