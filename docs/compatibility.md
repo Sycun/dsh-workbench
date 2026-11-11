@@ -30,3 +30,9 @@ DSH 宿主版本 `0.2.2-rc.1`，桌面包声明构建 commit `c59d10aff167ad7eef
 Alpha 5 增加了通用 HTTP/JSON 连接和原生项目生命周期。新增自动化测试覆盖实际回环 HTTP 请求、归档/恢复顺序、部分失败、原生归档提醒和默认空配置；原生适配继续使用本机实际 DSH 工具 schema 校验。
 
 Alpha 5 桌面验证：新目录的名称自动回填已观察；独立空验证项目完成归档→恢复→可恢复删除，DSH 对应工作区登记同步出现/消失，原文件内容保持不变。原生 DSH 已归档而工作台未归档的真实提示已显示。原有可选 Kali 连接登录和项目关联在升级后保留。多会话批量行为、失败回滚边界和运行中拦截由模拟原生服务测试覆盖；未归档或删除业务项目。当前自动化测试共 32 项通过。
+
+Alpha 6 核对了 `session.modelCatalog`、`agentPresets.remoteExportList`、`AgentModel.select/current` 和 `session.create.agentPreset`。原生 `session.selectModel` 还会保存全局默认，因此工作台使用会话级 AgentModel 记录，仅在任务首次执行前应用。相关测试覆盖缺失/损坏模式、模型与推理等级校验、默认继承、并发重试和启动配置持久化。
+
+Alpha 7 的界面使用 DSH 前端共享模块 `@deepseek-ai/dsh-client-ui-primitives` 的 Menu、图标，以及 `settings.agentPreset` 名称/说明字典，不依赖内部 CSS 类名。模型目录缺少 name 的内置模式通过 DSH 翻译显示，自定义模式使用原始元数据。
+
+2026-11-11 Alpha 7 桌面实测：原生菜单显示标准/PTC/极简/创造模式的中文名称和说明，并保留已安装自定义模式；选择模式、模型和 Low 后输入框外框持续显示。隔离自检任务完成计划、阶段回报和申请验收；其原生 model/selection 事件与两条 request/header 均记录所选模型及 low，且刷新模型目录后宿主默认仍为 max。此验证没有读取业务文件或调用外部执行端。自动化测试共 40 项通过。

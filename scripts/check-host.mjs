@@ -22,7 +22,7 @@ try {
   // Exercise the generated client against actual React and SSR; no browser or model API call.
   const React = await import('react'), renderer = await import('react-dom/server');
   let client;
-  vm.runInNewContext(await readFile(new URL('../lib/client.js', import.meta.url), 'utf8'), { window: { __ModuleLoader__: { load: def => { client = def.factory(name => { assert.equal(name, 'react'); return React; }); } } }, fetch, setInterval, clearInterval, Intl });
+  vm.runInNewContext(await readFile(new URL('../lib/client.js', import.meta.url), 'utf8'), { window: { __ModuleLoader__: { load: def => { client = def.factory(name => { if (name === 'react') return React; if (name === '@deepseek-ai/dsh-client-ui-primitives') return { Menu: ({ anchor }) => anchor }; throw new Error('Unexpected runtime module: ' + name); }); } } }, fetch, setInterval, clearInterval, Intl });
   const slots = [];
   client.apply({ slots: { inject: (_, fn) => fn(), register: (meta, component) => slots.push({ meta, component }) }, remote: {}, uiWorkspace: {} });
   assert.deepEqual(slots.map(s => s.meta.name), ['main', 'sidebar.panellist']);

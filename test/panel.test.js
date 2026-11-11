@@ -27,6 +27,13 @@ test('首页默认只有交办入口，连接和项目表单位于设置二级�
   const html = renderToString(React.createElement(Panel));
   assert.ok(html.includes('你想安排什么工作')); assert.ok(html.includes('交给员工')); assert.ok(html.includes('默认工作区'));
   assert.ok(!html.includes('平台登录')); assert.ok(!html.includes('项目绝对路径')); assert.ok(!html.includes('artex 密码')); assert.ok(html.includes('设置'));
+  assert.ok(html.includes('智能体模式')); assert.ok(html.includes('模型选择'));
+});
+test('模式和模型来自 DSH 目录，显示默认值且不提供 API Key 输入框', () => {
+  const Panel = createPanel(React, {});
+  const html = renderToString(React.createElement(Panel, { initialRuntimeCatalog: { models: { default: { provider: 'p', model: 'm' }, groups: [{ id: 'p', name: '现有提供方', models: [{ id: 'm', name: '现有模型' }] }] }, presets: [{ id: 'standard', name: '标准模式', isDefault: true }], errors: [] } }));
+  for (const text of ['现有模型', '标准模式']) assert.ok(html.includes(text));
+  assert.ok(!html.includes('API Key'));
 });
 test('全新安装的工具接入为空，并提供通用接口表单', () => {
   const Panel = createPanel(React, {});
@@ -38,4 +45,16 @@ test('原生归档不同步时显示提醒，项目管理提供整项目归档�
   const Panel = createPanel(React, {});
   const html = renderToString(React.createElement(Panel, { initialScreen: 'settings', initialSnapshot: { projects: [{ id: 'p', name: '项目', cwd: '/example' }], tasks: [], projectWarnings: [{ projectId: 'p', name: '项目', message: 'DSH 已归档，工作台还没归档' }] } }));
   for (const label of ['DSH 已归档，工作台还没归档', '归档', '删除', '回收站']) assert.ok(html.includes(label));
+});
+
+test('使用 DSH 菜单组件与原生预设翻译，内部 ID 仍用于选择', () => {
+  const menus = [];
+  const nativeUi = { Menu: props => { menus.push(props); return props.anchor; } };
+  const ctx = { locale: { bind: ns => { assert.equal(ns, 'settings.agentPreset'); return key => ({ presetStandardName: '标准模式', presetStandardDescription: 'DSH 的标准模式说明' }[key] || key); } } };
+  const Panel = createPanel(React, ctx, nativeUi);
+  const html = renderToString(React.createElement(Panel, { initialRuntimeCatalog: { models: null, presets: [{ id: 'standard', isDefault: true }], errors: [] } }));
+  assert.ok(html.includes('标准模式')); assert.ok(html.includes('data-workbench-composer'));
+  const presetMenu = menus.find(m => m.anchor.props['aria-label'] === '智能体模式');
+  assert.equal(presetMenu.portal, true);
+  assert.ok(presetMenu.items.some(item => item.id === 'standard' && renderToString(item.label).includes('DSH 的标准模式说明')));
 });
