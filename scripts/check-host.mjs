@@ -12,7 +12,7 @@ const store = await new Store(join(dir, 'test.json')).open();
 try {
   const wb = new Workbench(store), p = await wb.project({ name: '离线兼容性验证', cwd: dir });
   const task = await wb.create({ projectId: p.id, brief: '生成本地摘要' }); await wb.bind(task.id, 'test-session');
-  const tools = makeTools(wb, { catalog: () => [] }); assert.equal(tools.length, 11);
+  const tools = makeTools(wb); assert.equal(tools.length, 7);
   const plan = tools.find(t => t.name === 'workbench_plan');
   await plan.execute({ taskId: task.id, objective: '生成摘要', stages: [{ title: '读取资料', acceptance: '有来源' }] }, { agent: { id: 'test-session' } });
   await assert.rejects(plan.execute({ taskId: task.id, objective: 1 }, { agent: { id: 'test-session' } }));
@@ -20,9 +20,31 @@ try {
   const getTool = tools.find(t => t.name === 'workbench_get');
   const transient = await getTool.execute({ taskId: task.id }, { agent: { id: 'test-session' } });
   assert.equal(Object.hasOwn(transient.localOutput, 'error'), false, 'DSH tool output must be lossless JSON during concurrent export');
-  const disposes = [], registered = [];
-  await apply({ workspaceRegistry: { initializeDefault: async () => undefined }, tools: { register: t => registered.push(t.name) }, connection: { fetch: { register: r => registered.push(r.path) } }, systemPrompt: { section: s => registered.push(s.name) }, effect: fn => disposes.push(fn()) }, { dataFile: join(dir, 'host.json') });
-  assert.equal(registered.length, 22); for (const dispose of disposes) await dispose();
+  const disposes = [], registered = [], registeredRoutes = [], sections = [];
+  await apply({
+    workspaceRegistry: { initializeDefault: async () => undefined, list: () => [] },
+    tools: { register: tool => registered.push(tool.name) },
+    connection: { fetch: { register: route => registeredRoutes.push(route) } },
+    systemPrompt: { section: section => sections.push(section.name) },
+    effect: fn => disposes.push(fn())
+  }, { dataFile: join(dir, 'host.json') });
+  assert.deepEqual(registered, tools.map(tool => tool.name));
+  assert.deepEqual(sections, ['plugin:dsh-workbench']);
+  assert.equal(registeredRoutes.length, 1);
+  const route = registeredRoutes[0];
+  const url = new URL(route.path, 'http://localhost');
+  const snapshot = await route.fetch(new Request(url));
+  const payload = await snapshot.json();
+  assert.equal(snapshot.status, 200, payload.error);
+  assert.deepEqual(payload.tasks, []);
+  const unavailable = await route.fetch(new Request(url, {
+    method: 'POST',
+    headers: { 'X-DSH-Workbench': '1' },
+    body: JSON.stringify({ action: 'connection_save' })
+  }));
+  assert.equal(unavailable.status, 400);
+  assert.deepEqual(await unavailable.json(), { error: '不支持的操作' });
+  for (const dispose of disposes) await dispose();
   // Exercise the generated client against actual React and SSR; no browser or model API call.
   const React = await import('react'), renderer = await import('react-dom/server');
   let client;
@@ -33,5 +55,5 @@ try {
   const html = renderer.renderToString(React.createElement(slots[0].component));
   assert.ok(html.includes('交办工作')); assert.ok(html.includes('探索未至之境'));
   assert.ok(client.inject.includes('layout')); assert.ok(client.inject.includes('fileUpload')); assert.ok(client.inject.includes('remote.session')); assert.ok(client.inject.includes('remote.workspace'));
-  console.log('PASS: 19 registered tool definitions, schema validation, host registration, client slots and React SSR against installed DSH runtime');
+  console.log('PASS: 7 local tool definitions, schema validation, host registration, local HTTP routes, client slots and React SSR');
 } finally { await store.close(); await rm(dir, { recursive: true, force: true }); }
