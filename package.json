@@ -1,7 +1,7 @@
 {
   "name": "dsh-workbench",
-  "version": "0.1.0-alpha.16",
-  "description": "DSH 通用项目工作台：任务契约、阶段汇报、人工决策和专业执行端",
+  "version": "0.1.0-alpha.17",
+  "description": "DSH 项目工作台：本地项目、任务计划、阶段回报和人工验收",
   "private": true,
   "repository": {
     "type": "git",
@@ -16,11 +16,16 @@
   },
   "files": [
     "lib",
+    "!lib/connectors.js",
+    "!lib/kali.js",
+    "!lib/native-workers.js",
+    "!lib/team-prompts.js",
+    "!lib/team-tools.js",
+    "!lib/work-orders.js",
     "cordis.patch.yml",
     "README.md",
-    "docs",
-    "scripts/kali-bridge.py",
-    "deployment"
+    "docs/project-lifecycle.md",
+    "docs/project-outputs.md"
   ],
   "scripts": {
     "test": "node --test test/*.test.js",
@@ -32,7 +37,7 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "~4.1.0",
-    "@deepseek-ai/dsh-tools": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-tools": "0.2.2-rc.2",
     "react": ">=18"
   },
   "dsh": {
@@ -40,7 +45,7 @@
       "patch": "./cordis.patch.yml"
     },
     "engines": {
-      "dsh": "0.2.2-rc.1"
+      "dsh": "0.2.2-rc.2"
     },
     "client": {
       "platform": "web",

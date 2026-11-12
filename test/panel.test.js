@@ -14,7 +14,8 @@ const task = {
 test('原生面板渲染阶段、问题和执行回执，外部文字保持转义', () => {
   const Panel = createPanel(React, {});
   const html = renderToString(React.createElement(Panel, { initialSnapshot: { projects: [{ id: 'demo-project', name: '示例项目' }], tasks: [task], events: [] }, initialTaskId: task.id }));
-  for (const text of ['需要你决定', '阶段汇报', '整理现状', '暂停主管与专员', '答复员工', '核实为已完成']) assert.ok(html.includes(text), text);
+  for (const text of ['需要你决定', '阶段汇报', '整理现状', '暂停任务', '答复员工', 'artex · accepted']) assert.ok(html.includes(text), text);
+  assert.ok(!html.includes('核实为已完成'));
   assert.ok(!html.includes('<script>untrusted()')); assert.ok(html.includes('&lt;script&gt;'));
 });
 test('只有待验收状态展示验收动作', () => {
@@ -22,7 +23,7 @@ test('只有待验收状态展示验收动作', () => {
   const render = status => renderToString(React.createElement(Panel, { initialSnapshot: { projects: [], tasks: [{ ...task, status, summary: '自检交付' }], events: [] }, initialTaskId: task.id }));
   assert.ok(!render('running').includes('验收通过')); assert.ok(render('review').includes('验收通过'));
 });
-test('首页默认只有交办入口，连接和项目表单位于设置二级页面', () => {
+test('首页默认显示交办入口，项目表单位于设置页', () => {
   const Panel = createPanel(React, {});
   const html = renderToString(React.createElement(Panel));
   assert.ok(html.includes('探索未至之境')); assert.ok(html.includes('交给主管')); assert.ok(html.includes('默认工作区'));
@@ -35,11 +36,11 @@ test('模式和模型来自 DSH 目录，显示默认值且不提供 API Key 输
   for (const text of ['现有模型', '标准模式']) assert.ok(html.includes(text));
   assert.ok(!html.includes('API Key'));
 });
-test('全新安装的工具接入为空，并提供通用接口表单', () => {
+test('本机版设置页只显示项目和任务入口', () => {
   const Panel = createPanel(React, {});
-  const html = renderToString(React.createElement(Panel, { initialScreen: 'settings', initialSettingsTab: 'platforms' }));
-  assert.ok(html.includes('还没有外部连接')); assert.ok(html.includes('自定义 HTTP/JSON')); assert.ok(html.includes('服务地址（不含路径）'));
-  assert.ok(!html.includes('artex 密码')); assert.ok(!html.includes('已启用 Kali 开机启动'));
+  const html = renderToString(React.createElement(Panel, { initialScreen: 'settings', initialSettingsTab: 'projects' }));
+  assert.ok(html.includes('项目与目录')); assert.ok(html.includes('当前任务设置'));
+  assert.ok(!html.includes('工具接入')); assert.ok(!html.includes('服务地址（不含路径）'));
 });
 test('原生归档不同步时显示提醒，项目管理提供整项目归档和删除入口', () => {
   const Panel = createPanel(React, {});
